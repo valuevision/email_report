@@ -2,12 +2,14 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
+	"io"
 	"log"
+	"os"
 	"path/filepath"
 
 	"github.com/pborman/uuid"
-	"github.com/scorredoira/email"
+
+	"gopkg.in/gomail.v2"
 )
 
 var (
@@ -41,19 +43,28 @@ func main() {
 		log.Fatal("mailqueue required")
 	}
 
-	m := email.NewMessage(subject, "Hi;\n\nYour report is attached.\n\nThank you")
-	m.From = sender
-	m.To = []string{recipient}
+	m := gomail.NewMessage()
+	m.SetHeader("From", sender)
+	m.SetHeader("To", recipient)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/plain", "Hello,\n\nYour report is attached.\n\n")
+	m.Attach(reportFile)
 
-	if err := m.Attach(reportFile); err != nil {
-		log.Fatal(err)
-	}
+	s := gomail.SendFunc(func(from string, to []string, msg io.WriterTo) error {
+		p := filepath.Join(mailqueue, uuid.New()+".eml")
+		f, err := os.Create(p)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
 
-	data := m.Bytes()
-	name := uuid.New()
+		if _, err = msg.WriteTo(f); err != nil {
+			return err
+		}
+		return nil
+	})
 
-	target := filepath.Join(mailqueue, name+".eml")
-	if err := ioutil.WriteFile(target, data, 0644); err != nil {
+	if err := gomail.Send(s, m); err != nil {
 		log.Fatal(err)
 	}
 }
