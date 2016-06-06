@@ -6,22 +6,24 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pborman/uuid"
-
 	"gopkg.in/gomail.v2"
 )
 
 var (
-	reportFile string
-	recipient  string
-	sender     string
-	subject    string = "Your report is attached"
-	mailqueue  string
+	reportFile  string
+	reportFiles string
+	recipient   string
+	sender      string
+	subject     string = "Your report is attached"
+	mailqueue   string
 )
 
 func init() {
 	flag.StringVar(&reportFile, "file", "", "file name of report")
+	flag.StringVar(&reportFiles, "files", "", "file names to attach, comma separated")
 	flag.StringVar(&recipient, "to", "", "recipient of email report")
 	flag.StringVar(&sender, "from", "", "sender of email report")
 	flag.StringVar(&subject, "subject", subject, "subject of email report")
@@ -30,7 +32,7 @@ func init() {
 
 func main() {
 	flag.Parse()
-	if reportFile == "" {
+	if reportFile == "" && reportFiles == "" {
 		log.Fatal("report file required")
 	}
 	if recipient == "" {
@@ -48,7 +50,15 @@ func main() {
 	m.SetHeader("To", recipient)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/plain", "Hello,\n\nYour report is attached.\n\n")
-	m.Attach(reportFile)
+	if reportFile != "" {
+		m.Attach(reportFile)
+	}
+	if reportFiles != "" {
+		files := strings.Split(reportFiles, ",")
+		for _, file := range files {
+			m.Attach(file)
+		}
+	}
 
 	s := gomail.SendFunc(func(from string, to []string, msg io.WriterTo) error {
 		p := filepath.Join(mailqueue, uuid.New()+".eml")
