@@ -1,67 +1,67 @@
 package main
 
 import (
-	"flag"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/pborman/uuid"
+	"github.com/urfave/cli"
 	"gopkg.in/gomail.v2"
 )
 
-var (
-	reportFile  string
-	reportFiles string
-	recipient   string
-	sender      string
-	subject     = "Your report is attached"
-	mailqueue   string
-)
-
-func init() {
-	flag.StringVar(&reportFile, "file", "", "file name of report")
-	flag.StringVar(&reportFiles, "files", "", "file names to attach, comma separated")
-	flag.StringVar(&recipient, "to", "", "recipient of email report")
-	flag.StringVar(&sender, "from", "", "sender of email report")
-	flag.StringVar(&subject, "subject", subject, "subject of email report")
-	flag.StringVar(&mailqueue, "q", "", "mail queue folder")
+func main() {
+	app := cli.NewApp()
+	app.Action = appMain
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "from, f",
+			Usage: "email sender",
+		},
+		cli.StringSliceFlag{
+			Name:  "recipient, r",
+			Usage: "recipient(s) of email",
+		},
+		cli.StringFlag{
+			Name:  "subject, s",
+			Usage: "email subject",
+			Value: "Your report is attached",
+		},
+		cli.StringSliceFlag{
+			Name:  "attachment, a",
+			Usage: "file(s) to attach to email",
+		},
+		cli.StringFlag{
+			Name:  "mailqueue, q",
+			Usage: "email mailqueue folder",
+		},
+	}
+	app.HideVersion = true
+	if err := app.Run(os.Args); err != nil {
+		log.Fatalf("%v\n", err)
+	}
 }
 
-func main() {
-	flag.Parse()
-	if reportFile == "" && reportFiles == "" {
-		log.Fatal("report file required")
-	}
-	if recipient == "" {
-		log.Fatal("recipient required")
-	}
-	if sender == "" {
-		log.Fatal("sender required")
-	}
-	if mailqueue == "" {
-		log.Fatal("mailqueue required")
-	}
+func appMain(c *cli.Context) error {
+	from := c.String("from")
+	to := c.StringSlice("recipient")
+	subj := c.String("subject")
+	attach := c.StringSlice("attachment")
+	queue := c.String("mailqueue")
 
 	m := gomail.NewMessage()
-	m.SetHeader("From", sender)
-	m.SetHeader("To", recipient)
-	m.SetHeader("Subject", subject)
+	m.SetHeader("From", from)
+	m.SetHeader("To", to...)
+	m.SetHeader("Subject", subj)
 	m.SetBody("text/plain", "Hello,\n\nYour report is attached.\n\n")
-	if reportFile != "" {
-		m.Attach(reportFile)
-	}
-	if reportFiles != "" {
-		files := strings.Split(reportFiles, ",")
-		for _, file := range files {
-			m.Attach(file)
-		}
+
+	for _, file := range attach {
+		m.Attach(file)
 	}
 
 	s := gomail.SendFunc(func(from string, to []string, msg io.WriterTo) error {
-		p := filepath.Join(mailqueue, uuid.New()+".eml")
+		p := filepath.Join(queue, uuid.New()+".eml")
 		f, err := os.Create(p)
 		if err != nil {
 			return err
@@ -78,7 +78,5 @@ func main() {
 		return nil
 	})
 
-	if err := gomail.Send(s, m); err != nil {
-		log.Fatal(err)
-	}
+	return gomail.Send(s, m)
 }
