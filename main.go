@@ -17,7 +17,7 @@ var (
 	reportFiles string
 	recipient   string
 	sender      string
-	subject     string = "Your report is attached"
+	subject     = "Your report is attached"
 	mailqueue   string
 )
 
@@ -66,7 +66,11 @@ func main() {
 		if err != nil {
 			return err
 		}
-		defer f.Close()
+		defer func(x string) {
+			if e := f.Close(); e != nil {
+				log.Fatalf("closing file %q: %v", x, e)
+			}
+		}(p)
 
 		if _, err = msg.WriteTo(f); err != nil {
 			return err
