@@ -1,0 +1,61 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/BurntSushi/toml",
+			"repository": "https://github.com/BurntSushi/toml",
+			"vcs": "git",
+			"revision": "99064174e013895bbd9b025c31100bd1d9b590ca",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/pborman/uuid",
+			"repository": "https://github.com/pborman/uuid",
+			"vcs": "git",
+			"revision": "5007efa264d92316c43112bc573e754bc889b7b1",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/urfave/cli",
+			"repository": "https://github.com/urfave/cli",
+			"vcs": "git",
+			"revision": "0bdeddeeb0f650497d603c4ad7b20cfe685682f6",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/alexcesaro/quotedprintable.v3",
+			"repository": "https://gopkg.in/alexcesaro/quotedprintable.v3",
+			"vcs": "git",
+			"revision": "2caba252f4dc53eaf6b553000885530023f54623",
+			"branch": "v3",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/gomail.v2",
+			"repository": "https://gopkg.in/gomail.v2",
+			"vcs": "git",
+			"revision": "81ebce5c23dfd25c6c67194b37d3dd3f338c98b1",
+			"branch": "v2",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/urfave/cli.v1",
+			"repository": "https://gopkg.in/urfave/cli.v1",
+			"vcs": "git",
+			"revision": "0bdeddeeb0f650497d603c4ad7b20cfe685682f6",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/yaml.v2",
+			"repository": "https://gopkg.in/yaml.v2",
+			"vcs": "git",
+			"revision": "a5b47d31c556af34a302ce5d659e6fea44d90de0",
+			"branch": "v2",
+			"notests": true
+		}
+	]
+}
